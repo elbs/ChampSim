@@ -1,0 +1,10 @@
+sat_solver soplex libquantum mcf cactusADM mlpack_cf omnetpp data_caching
+soplex libquantum graph_analytics mcf astar bzip2 zeusmp lbm
+GemsFDTD sat_solver gcc gromacs sphinx3 data_caching wrf milc
+sphinx3 gromacs lbm sat_solver soplex GemsFDTD milc bzip2
+cactusADM astar omnetpp gromacs leslie3d bwaves wrf zeusmp
+bzip2 soplex zeusmp GemsFDTD mlpack_cf mcf bwaves gromacs
+milc GemsFDTD astar gromacs wrf mcf xalancbmk sat_solver
+astar leslie3d zeusmp xalancbmk graph_analytics mlpack_cf bwaves sat_solver
+xalancbmk graph_analytics sphinx3 lbm omnetpp sat_solver libquantum mlpack_cf
+sat_solver astar milc bzip2 GemsFDTD zeusmp xalancbmk leslie3d

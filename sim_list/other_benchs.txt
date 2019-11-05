@@ -1,0 +1,4 @@
+000.dataCaching_s-B.champsimtrace.gz
+001.graphAnalytics_s-B.champsimtrace.gz
+002.satSolver_s-B.champsimtrace.gz
+003.mlpackCf_s-B.champsimtrace.gz
