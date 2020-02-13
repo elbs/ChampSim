@@ -90,6 +90,10 @@ class CACHE : public MEMORY {
     uint32_t reads_available_this_cycle;
     uint8_t cache_type;
 
+    // Elba: invertible matrix used for address manipulation
+    // 64 is the length of the matrix
+    uint64_t llc_inv_matrix[64][64];
+
     // prefetch stats
     uint64_t pf_requested,
              pf_issued,

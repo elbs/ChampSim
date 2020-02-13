@@ -22,6 +22,8 @@ void CACHE::handle_fill()
         // find victim
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
         if (cache_type == IS_LLC) {
+            // Elba: change address & set calculation here
+            // TODO
             way = llc_find_victim(fill_cpu, MSHR.entry[mshr_index].instr_id, set, block[set], MSHR.entry[mshr_index].ip, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].type);
         }
         else
@@ -32,6 +34,7 @@ void CACHE::handle_fill()
 
             // update replacement policy
             if (cache_type == IS_LLC) {
+                // Elba: set and way has already been changed
                 llc_update_replacement_state(fill_cpu, set, way, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].ip, 0, MSHR.entry[mshr_index].type, 0);
 
             }
@@ -144,6 +147,8 @@ void CACHE::handle_fill()
               
             // update replacement policy
             if (cache_type == IS_LLC) {
+                // Elba: change address & set calculation here
+                // TODO
                 llc_update_replacement_state(fill_cpu, set, way, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].ip, block[set][way].full_addr, MSHR.entry[mshr_index].type, 0);
             }
             else
@@ -199,7 +204,7 @@ void CACHE::handle_fill()
                 if (PROCESSED.occupancy < PROCESSED.SIZE)
                     PROCESSED.add_queue(&MSHR.entry[mshr_index]);
             }
-            //else if (cache_type == IS_L1D) {
+            //else if (cache_type == IS_L1D) 
             else if ((cache_type == IS_L1D) && (MSHR.entry[mshr_index].type != PREFETCH)) {
                 if (PROCESSED.occupancy < PROCESSED.SIZE)
                     PROCESSED.add_queue(&MSHR.entry[mshr_index]);
@@ -243,6 +248,8 @@ void CACHE::handle_writeback()
         if (way >= 0) { // writeback hit (or RFO hit for L1D)
 
             if (cache_type == IS_LLC) {
+                // Elba: change address & set calculations here (but what about way?)
+                // TODO
                 llc_update_replacement_state(writeback_cpu, set, way, block[set][way].full_addr, WQ.entry[index].ip, 0, WQ.entry[index].type, 1);
 
             }
@@ -398,6 +405,8 @@ void CACHE::handle_writeback()
                 // find victim
                 uint32_t set = get_set(WQ.entry[index].address), way;
                 if (cache_type == IS_LLC) {
+                    // Elba: change address & set calculation here
+                    // TODO
                     way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, set, block[set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                 }
                 else
@@ -473,6 +482,8 @@ void CACHE::handle_writeback()
 
                     // update replacement policy
                     if (cache_type == IS_LLC) {
+                      // Elba: change address & set calculation here (way has been fixed already)
+                      // TODO
                         llc_update_replacement_state(writeback_cpu, set, way, WQ.entry[index].full_addr, WQ.entry[index].ip, block[set][way].full_addr, WQ.entry[index].type, 0);
                     }
                     else
@@ -556,7 +567,7 @@ void CACHE::handle_read()
                     if (PROCESSED.occupancy < PROCESSED.SIZE)
                         PROCESSED.add_queue(&RQ.entry[index]);
                 }
-                //else if (cache_type == IS_L1D) {
+                //else if (cache_type == IS_L1D) 
                 else if ((cache_type == IS_L1D) && (RQ.entry[index].type != PREFETCH)) {
                     if (PROCESSED.occupancy < PROCESSED.SIZE)
                         PROCESSED.add_queue(&RQ.entry[index]);
@@ -578,6 +589,8 @@ void CACHE::handle_read()
 
                 // update replacement policy
                 if (cache_type == IS_LLC) {
+                    // Elba: change address & set calculation here (but what about way?)
+                    // TODO
                     llc_update_replacement_state(read_cpu, set, way, block[set][way].full_addr, RQ.entry[index].ip, 0, RQ.entry[index].type, 1);
 
                 }
@@ -841,6 +854,8 @@ void CACHE::handle_prefetch()
 
                 // update replacement policy
                 if (cache_type == IS_LLC) {
+                    // Elba: change address & set calculation here (but what about way?)
+                    // TODO
                     llc_update_replacement_state(prefetch_cpu, set, way, block[set][way].full_addr, PQ.entry[index].ip, 0, PQ.entry[index].type, 1);
 
                 }

@@ -6,7 +6,8 @@ if [ "$#" -lt 4 ]; then
     exit 1
 fi
 
-TRACE_DIR=$PWD/dpc3_traces
+SCRATCH_DIR=/scratch/user/elba
+TRACE_DIR=$SCRATCH_DIR/dpc3_traces
 BINARY=${1}
 N_WARM=${2}
 N_SIM=${3}

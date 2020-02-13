@@ -1,0 +1,4 @@
+# building
+bin/*
+obj/*
+results_*/

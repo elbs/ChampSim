@@ -99,6 +99,12 @@ uint64_t rotl64 (uint64_t n, unsigned int c),
 // log base 2 function from efectiu
 int lg2(int n);
 
+// Elba: change uint64_t to a 64-bit binary array
+int *addr_to_arr(uint64_t addr);
+
+// Elba: change 64-int binary (0/1 only) array to uint64_t
+uint64_t arr_to_addr(int *arr);
+
 // smart random number generator
 class RANDOM {
   public:

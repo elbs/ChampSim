@@ -278,6 +278,35 @@ int lg2(int n)
     return c;
 }
 
+// Elba: change uint64_t to a 64-int binary (0/1 only) array
+int *addr_to_arr(uint64_t addr)
+{
+  // Allocate space for 64-int array 
+  const int addr_length = 64;
+  int *arr = (int*)malloc(sizeof(int)*addr_length); 
+
+  // Use bit shift and masking to get lone bits
+  for (int i = 0; i < addr_length; i++) {
+   arr[i] = (int)((addr >> i) & 0xFF); 
+  }
+
+  // Return the array
+  return arr;
+}
+
+// Elba: change 64-int binary (0/1 only) array to uint64_t
+uint64_t arr_to_addr(int *arr) 
+{
+  const int addr_length = 64;
+  uint64_t addr = 0;
+
+  for(int i = 0; i < addr_length; i++) {
+    addr += (uint64_t) arr[i];
+  }
+
+  return addr;
+}
+
 uint64_t rotl64 (uint64_t n, unsigned int c)
 {
     const unsigned int mask = (CHAR_BIT*sizeof(n)-1);
