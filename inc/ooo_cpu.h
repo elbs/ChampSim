@@ -25,6 +25,10 @@ using namespace std;
 //#define EXEC_LATENCY 0
 //#define DECODE_LATENCY 2
 
+// Elba: define address and matrix sizes
+#define MAT_LENGTH 32
+#define ADDR_LENGTH 64
+
 #define STA_SIZE (ROB_SIZE*NUM_INSTR_DESTINATIONS_SPARC)
 
 extern uint32_t SCHEDULING_LATENCY, EXEC_LATENCY, DECODE_LATENCY;

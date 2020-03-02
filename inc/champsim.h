@@ -99,11 +99,14 @@ uint64_t rotl64 (uint64_t n, unsigned int c),
 // log base 2 function from efectiu
 int lg2(int n);
 
-// Elba: change uint64_t to a 64-bit binary array
-int *addr_to_arr(uint64_t addr);
+// Elba: change uint64_t value to a 64-bit binary array
+uint64_t *addr_to_arr(uint64_t addr, uint64_t *arr);
 
-// Elba: change 64-int binary (0/1 only) array to uint64_t
-uint64_t arr_to_addr(int *arr);
+// Elba: change 64-int binary (0/1 only) array to uint64_t value
+uint64_t arr_to_addr(uint64_t *arr);
+
+// Elba: matrix multiplication
+uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr);
 
 // smart random number generator
 class RANDOM {

@@ -278,33 +278,80 @@ int lg2(int n)
     return c;
 }
 
-// Elba: change uint64_t to a 64-int binary (0/1 only) array
-int *addr_to_arr(uint64_t addr)
-{
-  // Allocate space for 64-int array 
-  const int addr_length = 64;
-  int *arr = (int*)malloc(sizeof(int)*addr_length); 
+// Elba: invertible matrix used for address manipulation
+// 64 is the length of the matrix
+uint64_t llc_inv_matrix[64][64];
 
+// Elba: change uint64_t value to a 64-int binary (0/1 only) array
+uint64_t *addr_to_arr(uint64_t addr, uint64_t *arr)
+{
   // Use bit shift and masking to get lone bits
-  for (int i = 0; i < addr_length; i++) {
-   arr[i] = (int)((addr >> i) & 0xFF); 
+  for (int i = 0; i < ADDR_LENGTH; i++) {
+   arr[i] = (uint64_t)((addr >> i) & 0xFF); 
   }
 
-  // Return the array
+  // Return the array pointer
   return arr;
 }
 
 // Elba: change 64-int binary (0/1 only) array to uint64_t
-uint64_t arr_to_addr(int *arr) 
+uint64_t arr_to_addr(uint64_t *arr) 
 {
-  const int addr_length = 64;
   uint64_t addr = 0;
 
-  for(int i = 0; i < addr_length; i++) {
+  for (int i = 0; i < ADDR_LENGTH; i++) {
     addr += (uint64_t) arr[i];
   }
 
   return addr;
+}
+
+// Elba: matrix multiplication
+uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr) 
+{
+  const int addr_dim = 1;
+
+  for (int a = 0; a < ADDR_LENGTH; a++)
+    for (int b = 0; b < addr_dim; b++) {
+      uint64_t sum = 0;
+      for (int c = 0; c < ADDR_LENGTH; c++)
+        sum += llc_inv_matrix[a][b] * src_addr[c];
+      dest_addr[b] = sum;
+    }
+
+  return dest_addr; 
+}
+
+// Elba: print matrix
+void print_llc_inv_matrix()
+{
+  for (int i = 0; i < ADDR_LENGTH; i++) {
+    for (int j = 0; j < ADDR_LENGTH; j++) {
+      cout << llc_inv_matrix[i][j];
+    }
+    cout << endl;
+  }
+}
+
+// Elba: read matrix; stolen from Daniel ;)
+bool read_llc_inv_matrix(char *fname)
+{
+	char	s[1000];
+
+	FILE *f = fopen (fname, "r");
+	if (!f) 
+    return false;
+	for (int i = 0; i < MAT_LENGTH; i++) {
+		// read a line, ignoring comments
+		do {
+			fgets (s, 1000, f);
+			if (feof (f)) return false;
+		} while (s[0] == '#');
+		for (int j = 0; j < MAT_LENGTH; j++) llc_inv_matrix[i][j] = (s[j] == '1'); 
+  } 
+  fclose (f); 
+  
+  return true;
 }
 
 uint64_t rotl64 (uint64_t n, unsigned int c)
@@ -590,6 +637,11 @@ int main(int argc, char** argv)
     cout << "Number of CPUs: " << NUM_CPUS << endl;
     cout << "LLC sets: " << LLC_SET << endl;
     cout << "LLC ways: " << LLC_WAY << endl;
+
+    // Elba: Read and then print out the matrix here
+    cout << "LLC Matrix: " << endl;
+    read_llc_inv_matrix("/home/elba/ChampSim_elba/src/matrices/1.matrix");
+    print_llc_inv_matrix();
 
     if (knob_low_bandwidth)
         DRAM_MTPS = DRAM_IO_FREQ/4;
