@@ -21,10 +21,19 @@ void CACHE::handle_fill()
         uint32_t mshr_index = MSHR.next_fill_index;
 
         // find victim
+      
+        // Elba: change address and set calculations here used for LLC only
+        // TODO:
+        // uint64_t *modified_addr_arr[ADDR_LENGTH];
+        // mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
+        // llc_set = get_set(arr_to_addr(modified_addr_arr));
+        
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
+        
         if (cache_type == IS_LLC) {
-            // Elba: change address & set calculation here
-            // TODO
+            // #1 LLC Find Victim 
+            // Elba: llc_set calculations already done before. No need to do again.
+            // TODO: way = llc_find_victim(fill_cpu, MSHR.entry[mshr_index].instr_id, llc_set, block[llc_set], MSHR.entry[mshr_index].ip, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].type);
             way = llc_find_victim(fill_cpu, MSHR.entry[mshr_index].instr_id, set, block[set], MSHR.entry[mshr_index].ip, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].type);
         }
         else
@@ -35,7 +44,9 @@ void CACHE::handle_fill()
 
             // update replacement policy
             if (cache_type == IS_LLC) {
-                // Elba: set and way has already been changed
+                // #1 LLC Update Replacement
+                // Elba: llc_set and way has already been changed.
+                // TODO: llc_update_replacement_state(fill_cpu, llc_set, way, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].ip, 0, MSHR.entry[mshr_index].type, 0);
                 llc_update_replacement_state(fill_cpu, set, way, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].ip, 0, MSHR.entry[mshr_index].type, 0);
 
             }
@@ -148,8 +159,8 @@ void CACHE::handle_fill()
               
             // update replacement policy
             if (cache_type == IS_LLC) {
-                // Elba: change address & set calculation here
-                // TODO
+                // #2 LLC Update Replacement
+                // Elba: set and way has already been changed; do nothing
                 llc_update_replacement_state(fill_cpu, set, way, MSHR.entry[mshr_index].full_addr, MSHR.entry[mshr_index].ip, block[set][way].full_addr, MSHR.entry[mshr_index].type, 0);
             }
             else
@@ -244,17 +255,22 @@ void CACHE::handle_writeback()
         int index = WQ.head;
 
         // Elba: change address, way, and set calculations here for LLC only
-        // TODO
+        int llc_way = 0;
+        // uint64_t *modified_addr_arr[ADDR_LENGTH];
+        // mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
+        // llc_set = get_set(arr_to_addr(modified_addr_arr));
+        // llc_way = llc_check_hit(&WQ.entry[index], arr_to_addr(modified_addr_arr));
 
         // access cache
         uint32_t set = get_set(WQ.entry[index].address);
         int way = check_hit(&WQ.entry[index]);
         
-        if (way >= 0) { // writeback hit (or RFO hit for L1D)
+        if (way >= 0 || llc_way >= 0) { // writeback hit (or RFO hit for L1D)
 
             if (cache_type == IS_LLC) {
-                // Elba: use the llc set, way, and address here only 
-                // TODO
+                // #3 LLC Update Replacement
+                // Elba: use the llc set, way, and change address here only 
+                // TODO: llc_update_replacement_state(writeback_cpu, llc_set, llc_way, block[llc_set][llc_way].full_addr, WQ.entry[index].ip, 0, WQ.entry[index].type, 1);
                 llc_update_replacement_state(writeback_cpu, set, way, block[set][way].full_addr, WQ.entry[index].ip, 0, WQ.entry[index].type, 1);
 
             }
@@ -410,8 +426,9 @@ void CACHE::handle_writeback()
                 // find victim
                 uint32_t set = get_set(WQ.entry[index].address), way;
                 if (cache_type == IS_LLC) {
-                    // Elba: change address & set calculation here
-                    // TODO
+                    // #2 LLC Find Victim 
+                    // Elba: llc_set calculations already done before. No need to do again.
+                    // TODO: way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, llc_set, block[llc_set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                     way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, set, block[set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                 }
                 else
@@ -487,8 +504,10 @@ void CACHE::handle_writeback()
 
                     // update replacement policy
                     if (cache_type == IS_LLC) {
-                      // Elba: change address & set calculation here (way has been fixed already)
-                      // TODO
+                      // #4 LLC Update Replacement
+                      // Elba: llc_set calculations already done before. No need to do again.
+                      // NOTE: this time, we don't have llc_way, but simply way. (Due to llc_find_victim() above.)
+                      // TODO: llc_update_replacement_state(writeback_cpu, llc_set, way, WQ.entry[index].full_addr, WQ.entry[index].ip, block[llc_set][way].full_addr, WQ.entry[index].type, 0);
                         llc_update_replacement_state(writeback_cpu, set, way, WQ.entry[index].full_addr, WQ.entry[index].ip, block[set][way].full_addr, WQ.entry[index].type, 0);
                     }
                     else
@@ -594,6 +613,7 @@ void CACHE::handle_read()
 
                 // update replacement policy
                 if (cache_type == IS_LLC) {
+                    // #5 LLC Update Replacement
                     // Elba: change address & set calculation here (but what about way?)
                     // TODO
                     llc_update_replacement_state(read_cpu, set, way, block[set][way].full_addr, RQ.entry[index].ip, 0, RQ.entry[index].type, 1);
@@ -859,6 +879,7 @@ void CACHE::handle_prefetch()
 
                 // update replacement policy
                 if (cache_type == IS_LLC) {
+                    // #6 LLC Update Replacement
                     // Elba: change address & set calculation here (but what about way?)
                     // TODO
                     llc_update_replacement_state(prefetch_cpu, set, way, block[set][way].full_addr, PQ.entry[index].ip, 0, PQ.entry[index].type, 1);
@@ -1164,9 +1185,10 @@ int CACHE::check_hit(PACKET *packet)
 }
 
 // Elba: Have to make variant where address is mutable, since we modify address
-int CACHE::llc_check_hit(PACKET *packet, uint64_t address)
+int CACHE::llc_check_hit(PACKET *packet, uint64_t modified_address)
 {
-    uint32_t set = get_set(address);
+    // Elba: Do the set selection via the changed address value
+    uint32_t set = get_set(modified_address);
     int match_way = -1;
 
     if (NUM_SET < set) {
@@ -1177,8 +1199,9 @@ int CACHE::llc_check_hit(PACKET *packet, uint64_t address)
     }
 
     // hit
+    // Elba: For tag comparison, we still use the original unmodified address
     for (uint32_t way=0; way<NUM_WAY; way++) {
-        if (block[set][way].valid && (block[set][way].tag == address)) {
+        if (block[set][way].valid && (block[set][way].tag == packet->address)) {
 
             match_way = way;
 

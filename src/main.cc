@@ -307,7 +307,9 @@ uint64_t arr_to_addr(uint64_t *arr)
 }
 
 // Elba: matrix multiplication
-uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr) 
+// TODO: make it so that it only does multiplication 
+// with set selection bits
+void mat_mul(uint64_t *src_addr, uint64_t *dest_addr) 
 {
   const int addr_dim = 1;
 
@@ -318,8 +320,6 @@ uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr)
         sum += llc_inv_matrix[a][b] * src_addr[c];
       dest_addr[b] = sum;
     }
-
-  return dest_addr; 
 }
 
 // Elba: print matrix

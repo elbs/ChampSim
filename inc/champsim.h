@@ -106,7 +106,7 @@ uint64_t *addr_to_arr(uint64_t addr, uint64_t *arr);
 uint64_t arr_to_addr(uint64_t *arr);
 
 // Elba: matrix multiplication
-uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr);
+void *mat_mul(uint64_t *src_addr, uint64_t *dest_addr);
 
 // smart random number generator
 class RANDOM {
