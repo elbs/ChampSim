@@ -311,10 +311,10 @@ uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr)
 {
   const int addr_dim = 1;
 
-  for (int a = 0; a < ADDR_LENGTH; a++)
+  for (int a = 0; a < MAT_LENGTH; a++)
     for (int b = 0; b < addr_dim; b++) {
       uint64_t sum = 0;
-      for (int c = 0; c < ADDR_LENGTH; c++)
+      for (int c = 0; c < MAT_LENGTH; c++)
         sum += llc_inv_matrix[a][b] * src_addr[c];
       dest_addr[b] = sum;
     }
@@ -325,8 +325,8 @@ uint64_t *mat_mul(uint64_t *src_addr, uint64_t *dest_addr)
 // Elba: print matrix
 void print_llc_inv_matrix()
 {
-  for (int i = 0; i < ADDR_LENGTH; i++) {
-    for (int j = 0; j < ADDR_LENGTH; j++) {
+  for (int i = 0; i < MAT_LENGTH; i++) {
+    for (int j = 0; j < MAT_LENGTH; j++) {
       cout << llc_inv_matrix[i][j];
     }
     cout << endl;
@@ -336,21 +336,22 @@ void print_llc_inv_matrix()
 // Elba: read matrix; stolen from Daniel ;)
 bool read_llc_inv_matrix(char *fname)
 {
-	char	s[1000];
+  char s[1000];
 
-	FILE *f = fopen (fname, "r");
-	if (!f) 
+  FILE *f = fopen (fname, "r");
+  if (!f) 
     return false;
-	for (int i = 0; i < MAT_LENGTH; i++) {
-		// read a line, ignoring comments
-		do {
-			fgets (s, 1000, f);
-			if (feof (f)) return false;
-		} while (s[0] == '#');
-		for (int j = 0; j < MAT_LENGTH; j++) llc_inv_matrix[i][j] = (s[j] == '1'); 
+  for (int i = 0; i < MAT_LENGTH; i++) {
+    // read a line, ignoring comments
+    do {
+      fgets (s, 1000, f);
+      if (feof (f)) return false;
+    } while (s[0] == '#');
+    for (int j = 0; j < MAT_LENGTH; j++) 
+      llc_inv_matrix[i][j] = (s[j] == '1'); 
   } 
   fclose (f); 
-  
+ 
   return true;
 }
 

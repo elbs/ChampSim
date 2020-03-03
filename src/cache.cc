@@ -10,6 +10,7 @@ void CACHE::handle_fill()
     if (fill_cpu == NUM_CPUS)
         return;
 
+    // Elba Comment: If there is something in the MSHR that can be filled, do it
     if (MSHR.next_fill_cycle <= current_core_cycle[fill_cpu]) {
 
 #ifdef SANITY_CHECK
@@ -158,6 +159,7 @@ void CACHE::handle_fill()
             sim_miss[fill_cpu][MSHR.entry[mshr_index].type]++;
             sim_access[fill_cpu][MSHR.entry[mshr_index].type]++;
 
+            // Elba Comment: this is where cache is finally filled from MSHR
             fill_cache(set, way, &MSHR.entry[mshr_index]);
 
             // RFO marks cache line dirty
@@ -241,6 +243,9 @@ void CACHE::handle_writeback()
     if ((WQ.entry[WQ.head].event_cycle <= current_core_cycle[writeback_cpu]) && (WQ.occupancy > 0)) {
         int index = WQ.head;
 
+        // Elba: change address, way, and set calculations here for LLC only
+        // TODO
+
         // access cache
         uint32_t set = get_set(WQ.entry[index].address);
         int way = check_hit(&WQ.entry[index]);
@@ -248,7 +253,7 @@ void CACHE::handle_writeback()
         if (way >= 0) { // writeback hit (or RFO hit for L1D)
 
             if (cache_type == IS_LLC) {
-                // Elba: change address & set calculations here (but what about way?)
+                // Elba: use the llc set, way, and address here only 
                 // TODO
                 llc_update_replacement_state(writeback_cpu, set, way, block[set][way].full_addr, WQ.entry[index].ip, 0, WQ.entry[index].type, 1);
 
@@ -1147,6 +1152,38 @@ int CACHE::check_hit(PACKET *packet)
 
             DP ( if (warmup_complete[packet->cpu]) {
             cout << "[" << NAME << "] " << __func__ << " instr_id: " << packet->instr_id << " type: " << +packet->type << hex << " addr: " << packet->address;
+            cout << " full_addr: " << packet->full_addr << " tag: " << block[set][way].tag << " data: " << block[set][way].data << dec;
+            cout << " set: " << set << " way: " << way << " lru: " << block[set][way].lru;
+            cout << " event: " << packet->event_cycle << " cycle: " << current_core_cycle[cpu] << endl; });
+
+            break;
+        }
+    }
+
+    return match_way;
+}
+
+// Elba: Have to make variant where address is mutable, since we modify address
+int CACHE::llc_check_hit(PACKET *packet, uint64_t address)
+{
+    uint32_t set = get_set(address);
+    int match_way = -1;
+
+    if (NUM_SET < set) {
+        cerr << "[" << NAME << "_ERROR] " << __func__ << " invalid set index: " << set << " NUM_SET: " << NUM_SET;
+        cerr << " address: " << hex << address << " full_addr: " << packet->full_addr << dec;
+        cerr << " event: " << packet->event_cycle << endl;
+        assert(0);
+    }
+
+    // hit
+    for (uint32_t way=0; way<NUM_WAY; way++) {
+        if (block[set][way].valid && (block[set][way].tag == address)) {
+
+            match_way = way;
+
+            DP ( if (warmup_complete[packet->cpu]) {
+            cout << "[" << NAME << "] " << __func__ << " instr_id: " << packet->instr_id << " type: " << +packet->type << hex << " addr: " << address;
             cout << " full_addr: " << packet->full_addr << " tag: " << block[set][way].tag << " data: " << block[set][way].data << dec;
             cout << " set: " << set << " way: " << way << " lru: " << block[set][way].lru;
             cout << " event: " << packet->event_cycle << " cycle: " << current_core_cycle[cpu] << endl; });
