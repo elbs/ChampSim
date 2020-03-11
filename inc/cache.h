@@ -178,6 +178,8 @@ class CACHE : public MEMORY {
              get_size(uint8_t queue_type, uint64_t address);
 
     int  check_hit(PACKET *packet),
+         // Elba: making an llc_check_hit
+         llc_check_hit(PACKET *packet, uint64_t address),
          invalidate_entry(uint64_t inval_addr),
          check_mshr(PACKET *packet),
          prefetch_line(uint64_t ip, uint64_t base_addr, uint64_t pf_addr, int prefetch_fill_level, uint32_t prefetch_metadata),

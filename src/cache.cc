@@ -23,9 +23,9 @@ void CACHE::handle_fill()
         // find victim
       
         // Elba: change address and set calculations here used for LLC only
-        int llc_set = -1;
-        
         // TODO: uncomment all this
+        //int llc_set = -1;
+        
         // Array to hold the modified address we'll use for set indexing 
         //uint64_t *modified_addr_arr[ADDR_LENGTH];
         
@@ -269,10 +269,10 @@ void CACHE::handle_writeback()
         int index = WQ.head;
 
         // Elba: change address, way, and set calculations here for LLC only
-        int llc_set = -1;
-        int llc_way = -1;
-
         // TODO: uncomment all this
+        //int llc_set = -1;
+        //int llc_way = -1;
+
         //uint64_t *modified_addr_arr[ADDR_LENGTH];
         //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
         //llc_set = get_set(arr_to_addr(modified_addr_arr));
@@ -590,8 +590,9 @@ void CACHE::handle_read()
             int index = RQ.head;
         
             // Elba: change address, way, and set calculations here for LLC only
-            int llc_set, llc_way;
             // TODO: uncomment all this
+            //int llc_set = -1;
+            //int llc_way = -1;
             //uint64_t *modified_addr_arr[ADDR_LENGTH];
             //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
             //llc_set = get_set(arr_to_addr(modified_addr_arr));
@@ -904,8 +905,9 @@ void CACHE::handle_prefetch()
             int index = PQ.head;
             
             // Elba: change address, way, and set calculations here for LLC only
-            int llc_set, llc_way;
             // TODO: uncomment all this
+            //int llc_set = -1;
+            //int llc_way = -1;
             //uint64_t *modified_addr_arr[ADDR_LENGTH];
             //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
             //llc_set = get_set(arr_to_addr(modified_addr_arr));
@@ -1238,7 +1240,7 @@ int CACHE::llc_check_hit(PACKET *packet, uint64_t modified_address)
 
     if (NUM_SET < set) {
         cerr << "[" << NAME << "_ERROR] " << __func__ << " invalid set index: " << set << " NUM_SET: " << NUM_SET;
-        cerr << " address: " << hex << address << " full_addr: " << packet->full_addr << dec;
+        cerr << " address: " << hex << modified_address << " full_addr: " << packet->full_addr << dec;
         cerr << " event: " << packet->event_cycle << endl;
         assert(0);
     }
