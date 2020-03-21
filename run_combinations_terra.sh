@@ -20,23 +20,23 @@ L1DPREF=( no )
 
 # L2 Prefecher
 #L2PREF=( no ip_stride kpcp next_line spp_dev )
-L2PREF=( no )
+L2PREF=( no spp_dev )
 
 # LLC Prefetcher
 #LLCPREF=( no next_line )
-LLCPREF=( no )
+LLCPREF=( no next_line )
 
 # LLC Replacement policy
 #LLCREPPOLS=( drrip lru ship srrip )
-LLCREPPOLS=( lru )
+LLCREPPOLS=( drrip_random drrip ship_random ship )
 
 # How many instructions we warm up to
 # How many we keep stats for
 # How many cores are used for each run 
 #WARMUP=100000000
-WARMUP=1000000
+WARMUP=10000000
 #INSTRS=500000000
-INSTRS=5000000
+INSTRS=50000000
 NCORES=1
 
 run_mix=1
@@ -53,15 +53,15 @@ nsims=$(echo "${ntraces}*${#BRANCHPRED[@]}*${#L1IPREF[@]}*${#L1DPREF[@]}*${#L2PR
 
 echo "This script will launch ${nsims} simulations with ${NCORES} cores:"
 echo "    - ${ntraces} traces"
-echo "    - ${#BRANCHPRED[@]} Branch Predictors" 
-echo "    - ${#L1IPREF[@]} L1I prefetchers" 
-echo "    - ${#L1DPREF[@]} L1D prefetchers" 
-echo "    - ${#L2PREF[@]} L2 prefetchers" 
-echo "    - ${#LLCPREF[@]} LLC prefetchers" 
-echo "    - ${#LLCREPPOLS[@]} LLC replacement policies"
+echo "    - ${#BRANCHPRED[@]} Branch Predictor(s)" 
+echo "    - ${#L1IPREF[@]} L1I prefetcher(s)" 
+echo "    - ${#L1DPREF[@]} L1D prefetcher(s)" 
+echo "    - ${#L2PREF[@]} L2 prefetcher(s)" 
+echo "    - ${#LLCPREF[@]} LLC prefetcher(s)" 
+echo "    - ${#LLCREPPOLS[@]} LLC replacement polic(y | ies)"
 echo
 
-binary_running_path=${BINARY_DIR}/running/uncommented/
+binary_running_path=${BINARY_DIR}/running/
 mkdir -p ${RESULTS_DIR}/${DATE}/${NCORES}cores/
 
 for branchpreds in "${BRANCHPRED[@]}"
@@ -78,7 +78,7 @@ do
           do
             binary=${branchpreds}-${l1iprefs}-${l1dprefs}-${l2prefs}-${llcprefs}-${repls}-${NCORES}core
             
-            if [ ! -e ${BINARY_DIR}/running/uncommented/${binary} ] ; then
+            if [ ! -e ${BINARY_DIR}/running/${binary} ] ; then
               echo "Error: no binary file found for ${binary}"
               exit
             fi
@@ -134,11 +134,6 @@ EOF
               fi
 
             done < ${tracelist}
-               
-            # Why this?
-            #if [[ ${repls} = "lru" ]]; then 
-            #    break
-            #fi
           done
         done
       done

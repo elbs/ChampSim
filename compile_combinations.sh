@@ -25,7 +25,7 @@ LLCPREF=( no next_line )
 
 # LLC Replacement policy
 #LLCREPPOLS=( drrip lru ship srrip)
-LLCREPPOLS=( lru ship srrip )
+LLCREPPOLS=( drrip_random drrip ship_random ship )
 
 # How many cores are used by each variation
 NCORES=1
