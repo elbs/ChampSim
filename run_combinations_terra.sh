@@ -4,7 +4,7 @@
 source common.cfg
 
 # Argument helps date runs
-DATE=$2
+DATE=$1
 
 # Branch Predictor
 #BRANCHPRED=( bimodal gshare hashed_perceptron perceptron )
@@ -20,15 +20,17 @@ L1DPREF=( no )
 
 # L2 Prefecher
 #L2PREF=( no ip_stride kpcp next_line spp_dev )
-L2PREF=( no spp_dev )
+#L2PREF=( no spp_dev )
+L2PREF=( no )
 
 # LLC Prefetcher
 #LLCPREF=( no next_line )
-LLCPREF=( no next_line )
+#LLCPREF=( no next_line )
+LLCPREF=( no )
 
 # LLC Replacement policy
 #LLCREPPOLS=( drrip lru ship srrip )
-LLCREPPOLS=( drrip_random drrip ship_random ship )
+LLCREPPOLS=( drrip_random drrip )
 
 # How many instructions we warm up to
 # How many we keep stats for
@@ -45,7 +47,8 @@ run_mix=1
 if [ "${NCORES}" -eq 1 ] ; then
     limit_hours=20 # 5 for 1B is enough
     ntasks=1
-    tracelist=${TRACELISTS}/spec2017_benchs.txt
+    #tracelist=${TRACELISTS}/spec2017_benchs.txt
+    tracelist=${TRACELISTS}/spec2017_benchs_short.txt
 fi
 
 ntraces=`cat ${tracelist}|wc -l`
@@ -62,6 +65,10 @@ echo "    - ${#LLCREPPOLS[@]} LLC replacement polic(y | ies)"
 echo
 
 binary_running_path=${BINARY_DIR}/running/
+if [ -e ${RESULTS_DIR}/${DATE}/${NCORES}cores/ ]; then
+  rm -rf ${RESULTS_DIR}/${DATE}/${NCORES}cores/
+fi
+
 mkdir -p ${RESULTS_DIR}/${DATE}/${NCORES}cores/
 
 for branchpreds in "${BRANCHPRED[@]}"
@@ -125,6 +132,7 @@ do
 #SBATCH --mail-user=elba@tamu.edu	                      # Send all emails to email_address
 
 ##First Executable Line
+#(${binary_running_path}/${binary} -warmup_instructions ${WARMUP} -simulation_instructions ${INSTRS} -traces ${trace_routes[@]}) &> ${RESULTS_DIR}/${DATE}/${NCORES}cores/results_${binary}_${WARMUP}_${INSTRS}_${trace_routes[@]}.txt
 ${binary_running_path}/${binary} -warmup_instructions ${WARMUP} -simulation_instructions ${INSTRS} -traces ${trace_routes[@]}
 EOF
 
