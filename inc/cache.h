@@ -3,6 +3,10 @@
 
 #include "memory_class.h"
 
+// Elba: define address and matrix sizes
+#define MAT_LENGTH 32
+#define ADDR_LENGTH 64
+
 // PAGE
 extern uint32_t PAGE_TABLE_LATENCY, SWAP_LATENCY;
 

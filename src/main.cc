@@ -641,7 +641,8 @@ int main(int argc, char** argv)
 
     // Elba: Read and then print out the matrix here
     cout << "LLC Matrix: " << endl;
-    read_llc_inv_matrix("/home/elba/ChampSim_elba/src/matrices/1.matrix");
+    const char *matrix = "/home/elba/ChampSim_elba/src/matrices/1.matrix";
+    read_llc_inv_matrix((char *) matrix);
     print_llc_inv_matrix();
 
     if (knob_low_bandwidth)

@@ -23,24 +23,27 @@ void CACHE::handle_fill()
         // find victim
       
         // Elba: change address and set calculations here used for LLC only
-        // TODO: uncomment all this
-        //int llc_set = -1;
-        
-        // Array to hold the modified address we'll use for set indexing 
-        //uint64_t *modified_addr_arr[ADDR_LENGTH];
+        int llc_set = -1;
+       
+        // Arrays to hold the current and also
+        // modified address we'll use for set indexing
+        uint64_t current_addr_arr[ADDR_LENGTH];
+        uint64_t modified_addr_arr[ADDR_LENGTH];
         
         // First, get original address and make it into an array
         // Next, do matrix multiplication between the original address and the
         // invertible matrix
         // TODO: make sure mat_mul is done correctly
-        //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr);
+        addr_to_arr(MSHR.entry[mshr_index].address, current_addr_arr);
+        mat_mul(current_addr_arr, modified_addr_arr);
         
         // Finally, use the matrix multiplication result, but converted back to
         // an address
-        //llc_set = get_set(arr_to_addr(modified_addr_arr));
+        llc_set = get_set(arr_to_addr(modified_addr_arr));
         
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
         
+        // TODO: uncomment all this
         // If cache is LLC, then set indexing value is above calculations
         //if (cache_type == IS_LLC) {
         //  set = llc_set; 
@@ -270,13 +273,25 @@ void CACHE::handle_writeback()
 
         // Elba: change address, way, and set calculations here for LLC only
         // TODO: uncomment all this
-        //int llc_set = -1;
-        //int llc_way = -1;
+        int llc_set = -1;
+        int llc_way = -1;
 
-        //uint64_t *modified_addr_arr[ADDR_LENGTH];
-        //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
-        //llc_set = get_set(arr_to_addr(modified_addr_arr));
-        //llc_way = llc_check_hit(&WQ.entry[index], arr_to_addr(modified_addr_arr));
+        // Arrays to hold the current and also
+        // modified address we'll use for set indexing
+        uint64_t current_addr_arr[ADDR_LENGTH];
+        uint64_t modified_addr_arr[ADDR_LENGTH];
+        
+        // First, get original address and make it into an array
+        // Next, do matrix multiplication between the original address and the
+        // invertible matrix
+        // TODO: make sure mat_mul is done correctly
+        addr_to_arr(WQ.entry[index].address, current_addr_arr); 
+        mat_mul(current_addr_arr, modified_addr_arr); 
+        
+        // Finally, use the matrix multiplication result, but converted back to
+        // an address
+        llc_set = get_set(arr_to_addr(modified_addr_arr));
+        llc_way = llc_check_hit(&WQ.entry[index], arr_to_addr(modified_addr_arr));
 
         // access cache
         uint32_t set = get_set(WQ.entry[index].address);
@@ -450,6 +465,7 @@ void CACHE::handle_writeback()
                     // #2 LLC Find Victim 
                     // Elba: set calculations already done before, but 
                     // need to be redone due to dumb code above.
+                    // TODO: uncomment below
                     //set = llc_set;
                     way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, set, block[set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                 }
@@ -590,18 +606,31 @@ void CACHE::handle_read()
             int index = RQ.head;
         
             // Elba: change address, way, and set calculations here for LLC only
-            // TODO: uncomment all this
-            //int llc_set = -1;
-            //int llc_way = -1;
-            //uint64_t *modified_addr_arr[ADDR_LENGTH];
-            //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
-            //llc_set = get_set(arr_to_addr(modified_addr_arr));
-            //llc_way = llc_check_hit(&WQ.entry[index], arr_to_addr(modified_addr_arr));
+            int llc_set = -1;
+            int llc_way = -1;
+        
+            // Arrays to hold the current and also
+            // modified address we'll use for set indexing
+            uint64_t current_addr_arr[ADDR_LENGTH];
+            uint64_t modified_addr_arr[ADDR_LENGTH];
+            
+            // First, get original address and make it into an array
+            // Next, do matrix multiplication between the original address and the
+            // invertible matrix
+            // TODO: make sure mat_mul is done correctly
+            addr_to_arr(RQ.entry[index].address, current_addr_arr);
+            mat_mul(current_addr_arr, modified_addr_arr);
+            
+            // Finally, use the matrix multiplication result, but converted back to
+            // an address
+            llc_set = get_set(arr_to_addr(modified_addr_arr));
+            llc_way = llc_check_hit(&RQ.entry[index], arr_to_addr(modified_addr_arr));
 
             // access cache
             uint32_t set = get_set(RQ.entry[index].address);
             int way = check_hit(&RQ.entry[index]);
         
+            // TODO: uncomment all this
             //if(cache_type == IS_LLC) {
             //  set = llc_set;
             //  way = llc_way;
@@ -905,18 +934,32 @@ void CACHE::handle_prefetch()
             int index = PQ.head;
             
             // Elba: change address, way, and set calculations here for LLC only
-            // TODO: uncomment all this
-            //int llc_set = -1;
-            //int llc_way = -1;
-            //uint64_t *modified_addr_arr[ADDR_LENGTH];
-            //mat_mul(addr_to_arr(WQ.entry[index].address), modified_addr_arr); 
-            //llc_set = get_set(arr_to_addr(modified_addr_arr));
-            //llc_way = llc_check_hit(&WQ.entry[index], arr_to_addr(modified_addr_arr));
+            int llc_set = -1;
+            int llc_way = -1;
+            
+            // Arrays to hold the current and also
+            // modified address we'll use for set indexing
+            uint64_t current_addr_arr[ADDR_LENGTH];
+            uint64_t modified_addr_arr[ADDR_LENGTH];
+            
+            
+            // First, get original address and make it into an array
+            // Next, do matrix multiplication between the original address and the
+            // invertible matrix
+            // TODO: make sure mat_mul is done correctly
+            addr_to_arr(PQ.entry[index].address, current_addr_arr);
+            mat_mul(current_addr_arr, modified_addr_arr);
+            
+            // Finally, use the matrix multiplication result, but converted back to
+            // an address
+            llc_set = get_set(arr_to_addr(modified_addr_arr));
+            llc_way = llc_check_hit(&PQ.entry[index], arr_to_addr(modified_addr_arr));
 
             // access cache
             uint32_t set = get_set(PQ.entry[index].address);
             int way = check_hit(&PQ.entry[index]);
         
+            // TODO: uncomment all this
             //if(cache_type == IS_LLC) {
             //  set = llc_set;
             //  way = llc_way;
