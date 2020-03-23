@@ -311,8 +311,10 @@ uint64_t arr_to_addr(uint64_t *arr)
 // with set selection bits
 void mat_mul(uint64_t *src_addr, uint64_t *dest_addr) 
 {
+  // Matrix is 64 x 1, by default. This is column dim. 
   const int addr_dim = 1;
 
+  // Then matrix multiply
   for (int a = 0; a < MAT_LENGTH; a++)
     for (int b = 0; b < addr_dim; b++) {
       uint64_t sum = 0;

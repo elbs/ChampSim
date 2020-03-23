@@ -27,19 +27,22 @@ void CACHE::handle_fill()
        
         // Arrays to hold the current and also
         // modified address we'll use for set indexing
-        uint64_t current_addr_arr[ADDR_LENGTH];
-        uint64_t modified_addr_arr[ADDR_LENGTH];
+        uint64_t sig_bits_addr_arr[ADDR_LENGTH];
+        uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
         
         // First, get original address and make it into an array
         // Next, do matrix multiplication between the original address and the
         // invertible matrix
-        // TODO: make sure mat_mul is done correctly
-        addr_to_arr(MSHR.entry[mshr_index].address, current_addr_arr);
-        mat_mul(current_addr_arr, modified_addr_arr);
+        // TODO: make sure bit shifts for mat_mul is done correctly
+        uint64_t block_bits = MSHR.entry[mshr_index].address >> (ADDR_LENGTH - lg2(NUM_SET));
+        uint64_t sig_bits = MSHR.entry[mshr_index].address  >> lg2(NUM_SET);
+        addr_to_arr(sig_bits, sig_bits_addr_arr);
+        mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
+        uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
         
         // Finally, use the matrix multiplication result, but converted back to
         // an address
-        llc_set = get_set(arr_to_addr(modified_addr_arr));
+        llc_set = get_set(final_addr);
         
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
         
@@ -272,31 +275,33 @@ void CACHE::handle_writeback()
         int index = WQ.head;
 
         // Elba: change address, way, and set calculations here for LLC only
-        // TODO: uncomment all this
         int llc_set = -1;
         int llc_way = -1;
 
         // Arrays to hold the current and also
         // modified address we'll use for set indexing
-        uint64_t current_addr_arr[ADDR_LENGTH];
-        uint64_t modified_addr_arr[ADDR_LENGTH];
+        uint64_t sig_bits_addr_arr[ADDR_LENGTH];
+        uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
         
         // First, get original address and make it into an array
         // Next, do matrix multiplication between the original address and the
         // invertible matrix
-        // TODO: make sure mat_mul is done correctly
-        addr_to_arr(WQ.entry[index].address, current_addr_arr); 
-        mat_mul(current_addr_arr, modified_addr_arr); 
+        uint64_t block_bits = WQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
+        uint64_t sig_bits = WQ.entry[index].address  >> lg2(NUM_SET);
+        addr_to_arr(sig_bits, sig_bits_addr_arr);
+        mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
+        uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
         
         // Finally, use the matrix multiplication result, but converted back to
         // an address
-        llc_set = get_set(arr_to_addr(modified_addr_arr));
-        llc_way = llc_check_hit(&WQ.entry[index], arr_to_addr(modified_addr_arr));
+        llc_set = get_set(final_addr);
+        llc_way = llc_check_hit(&WQ.entry[index], final_addr);
 
         // access cache
         uint32_t set = get_set(WQ.entry[index].address);
         int way = check_hit(&WQ.entry[index]);
 
+        // TODO: uncomment all this 
         //if(cache_type == IS_LLC) {
         //  set = llc_set;
         //  way = llc_way;
@@ -611,20 +616,23 @@ void CACHE::handle_read()
         
             // Arrays to hold the current and also
             // modified address we'll use for set indexing
-            uint64_t current_addr_arr[ADDR_LENGTH];
-            uint64_t modified_addr_arr[ADDR_LENGTH];
+            uint64_t sig_bits_addr_arr[ADDR_LENGTH];
+            uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
             
             // First, get original address and make it into an array
             // Next, do matrix multiplication between the original address and the
             // invertible matrix
             // TODO: make sure mat_mul is done correctly
-            addr_to_arr(RQ.entry[index].address, current_addr_arr);
-            mat_mul(current_addr_arr, modified_addr_arr);
+            uint64_t block_bits = RQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
+            uint64_t sig_bits = RQ.entry[index].address  >> lg2(NUM_SET);
+            addr_to_arr(sig_bits, sig_bits_addr_arr);
+            mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
+            uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
             
             // Finally, use the matrix multiplication result, but converted back to
             // an address
-            llc_set = get_set(arr_to_addr(modified_addr_arr));
-            llc_way = llc_check_hit(&RQ.entry[index], arr_to_addr(modified_addr_arr));
+            llc_set = get_set(final_addr);
+            llc_way = llc_check_hit(&RQ.entry[index], final_addr);
 
             // access cache
             uint32_t set = get_set(RQ.entry[index].address);
@@ -939,21 +947,24 @@ void CACHE::handle_prefetch()
             
             // Arrays to hold the current and also
             // modified address we'll use for set indexing
-            uint64_t current_addr_arr[ADDR_LENGTH];
-            uint64_t modified_addr_arr[ADDR_LENGTH];
+            uint64_t sig_bits_addr_arr[ADDR_LENGTH];
+            uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
             
             
             // First, get original address and make it into an array
             // Next, do matrix multiplication between the original address and the
             // invertible matrix
             // TODO: make sure mat_mul is done correctly
-            addr_to_arr(PQ.entry[index].address, current_addr_arr);
-            mat_mul(current_addr_arr, modified_addr_arr);
+            uint64_t block_bits = PQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
+            uint64_t sig_bits = PQ.entry[index].address  >> lg2(NUM_SET);
+            addr_to_arr(sig_bits, sig_bits_addr_arr);
+            mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
+            uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
             
             // Finally, use the matrix multiplication result, but converted back to
             // an address
-            llc_set = get_set(arr_to_addr(modified_addr_arr));
-            llc_way = llc_check_hit(&PQ.entry[index], arr_to_addr(modified_addr_arr));
+            llc_set = get_set(final_addr);
+            llc_way = llc_check_hit(&PQ.entry[index], final_addr);
 
             // access cache
             uint32_t set = get_set(PQ.entry[index].address);
