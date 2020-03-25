@@ -19,6 +19,10 @@ extern uint32_t PAGE_TABLE_LATENCY, SWAP_LATENCY;
 #define IS_L2C  5
 #define IS_LLC  6
 
+// Elba: CACHE RANDOMNESS
+#define IS_NORMAL 0
+#define IS_RANDOM 1
+
 // INSTRUCTION TLB
 #define ITLB_SET 16
 #define ITLB_WAY 4
@@ -93,6 +97,9 @@ class CACHE : public MEMORY {
     uint32_t MAX_READ, MAX_FILL;
     uint32_t reads_available_this_cycle;
     uint8_t cache_type;
+    // Elba: Variable sets whether to randomize set accesses
+    // Default is: 0/No
+    uint8_t random_cache = IS_NORMAL;
 
     // prefetch stats
     uint64_t pf_requested,

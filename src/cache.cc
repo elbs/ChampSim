@@ -48,7 +48,7 @@ void CACHE::handle_fill()
         
         // TODO: uncomment all this
         // If cache is LLC, then set indexing value is above calculations
-        //if (cache_type == IS_LLC) {
+        //if (cache_type == IS_LLC && random_cache == IS_RANDOM) {
         //  set = llc_set; 
         //}
         
@@ -302,7 +302,7 @@ void CACHE::handle_writeback()
         int way = check_hit(&WQ.entry[index]);
 
         // TODO: uncomment all this 
-        //if(cache_type == IS_LLC) {
+        //if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
         //  set = llc_set;
         //  way = llc_way;
         //}
@@ -471,7 +471,7 @@ void CACHE::handle_writeback()
                     // Elba: set calculations already done before, but 
                     // need to be redone due to dumb code above.
                     // TODO: uncomment below
-                    //set = llc_set;
+                    // if(random_cache == IS_RANDOM) set = llc_set;
                     way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, set, block[set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                 }
                 else
@@ -639,7 +639,7 @@ void CACHE::handle_read()
             int way = check_hit(&RQ.entry[index]);
         
             // TODO: uncomment all this
-            //if(cache_type == IS_LLC) {
+            //if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
             //  set = llc_set;
             //  way = llc_way;
             //}
@@ -971,7 +971,7 @@ void CACHE::handle_prefetch()
             int way = check_hit(&PQ.entry[index]);
         
             // TODO: uncomment all this
-            //if(cache_type == IS_LLC) {
+            //if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
             //  set = llc_set;
             //  way = llc_way;
             //}

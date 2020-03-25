@@ -17,6 +17,11 @@ uint64_t warmup_instructions     = 1000000,
          simulation_instructions = 10000000,
          champsim_seed;
 
+// Elba: Create options for random LLC & matrix file number
+// By default: 0/No and Matrix #1
+uint64_t random_llc = 0;
+uint64_t matrix_num = 1;
+
 time_t start_time;
 
 // PAGE TABLE
@@ -582,12 +587,15 @@ int main(int argc, char** argv)
     uint32_t seed_number = 0;
 
     // check to see if knobs changed using getopt_long()
+    // Elba: random_llc and matrix num knobs set here
     int c;
     while (1) {
         static struct option long_options[] =
         {
             {"warmup_instructions", required_argument, 0, 'w'},
             {"simulation_instructions", required_argument, 0, 'i'},
+            {"random_llc", required_argument, 0, 'r'},
+            {"matrix_num", required_argument, 0, 'm'},
             {"hide_heartbeat", no_argument, 0, 'h'},
             {"cloudsuite", no_argument, 0, 'c'},
             {"low_bandwidth",  no_argument, 0, 'b'},
@@ -611,6 +619,12 @@ int main(int argc, char** argv)
                 break;
             case 'i':
                 simulation_instructions = atol(optarg);
+                break;
+            case 'r':
+                random_llc = atol(optarg);
+                break;
+            case 'm':
+                matrix_num = atol(optarg);
                 break;
             case 'h':
                 show_heartbeat = 0;
@@ -636,16 +650,28 @@ int main(int argc, char** argv)
     // consequences of knobs
     cout << "Warmup Instructions: " << warmup_instructions << endl;
     cout << "Simulation Instructions: " << simulation_instructions << endl;
+    cout << "Randomized LLC?: " << (random_llc ? "yes" : "no") << endl;
+    if (random_llc)
+      cout << "If randomized, Matrix Number: " << (char) matrix_num << endl;
     //cout << "Scramble Loads: " << (knob_scramble_loads ? "ture" : "false") << endl;
     cout << "Number of CPUs: " << NUM_CPUS << endl;
     cout << "LLC sets: " << LLC_SET << endl;
     cout << "LLC ways: " << LLC_WAY << endl;
 
     // Elba: Read and then print out the matrix here
-    cout << "LLC Matrix: " << endl;
-    const char *matrix = "/home/elba/ChampSim_elba/src/matrices/1.matrix";
-    read_llc_inv_matrix((char *) matrix);
-    print_llc_inv_matrix();
+    if (random_llc) {
+       
+      cout << "LLC Matrix: " << endl;
+     
+      // Create the full path name and make it into char array
+      string matrix_path = "/home/elba/ChampSim_elba/src/matrices/" + to_string(matrix_num) + ".matrix";
+      int path_length = matrix_path.length();
+      char c_mat_path[path_length + 1];
+      strcpy(c_mat_path, matrix_path.c_str());
+
+      read_llc_inv_matrix((char *) c_mat_path);
+      print_llc_inv_matrix();
+    }
 
     if (knob_low_bandwidth)
         DRAM_MTPS = DRAM_IO_FREQ/4;
@@ -810,6 +836,8 @@ int main(int argc, char** argv)
         uncore.LLC.upper_level_icache[i] = &ooo_cpu[i].L2C;
         uncore.LLC.upper_level_dcache[i] = &ooo_cpu[i].L2C;
         uncore.LLC.lower_level = &uncore.DRAM;
+        // Elba: modify LLC to random, if needed
+        uncore.LLC.random_cache = random_llc ? IS_RANDOM : IS_NORMAL;
 
         // OFF-CHIP DRAM
         uncore.DRAM.fill_level = FILL_DRAM;
