@@ -19,8 +19,6 @@ L1IPREF=( no )
 L1DPREF=( no )
 
 # L2 Prefecher
-#L2PREF=( no ip_stride kpcp next_line spp_dev )
-#L2PREF=( no spp_dev )
 L2PREF=( no )
 
 # LLC Prefetcher
@@ -30,21 +28,21 @@ LLCPREF=( no )
 
 # LLC Replacement policy
 #LLCREPPOLS=( drrip lru ship srrip )
-LLCREPPOLS=( drrip_random drrip )
+LLCREPPOLS=( drrip_half drrip ship_half ship )
 
 # LLC Randomness
 LLCRANDOM=(0 1)
 
 # Matrix File Values
-RANDOMMATRIX=( 0 1 2 )
+RANDOMMATRIX=( 0 1 2 3 4 5 6 7 8 9 10)
 
 # How many instructions we warm up to
 # How many we keep stats for
 # How many cores are used for each run 
 #WARMUP=100000000
-WARMUP=1000000
+WARMUP=50000000
 #INSTRS=500000000
-INSTRS=5000000
+INSTRS=250000000
 NCORES=1
 
 run_mix=1
@@ -54,7 +52,7 @@ if [ "${NCORES}" -eq 1 ] ; then
     limit_hours=20 # 5 for 1B is enough
     ntasks=1
     #tracelist=${TRACELISTS}/spec2017_benchs.txt
-    tracelist=${TRACELISTS}/spec2017_benchs_short.txt
+    tracelist=${TRACELISTS}/spec2017_benchs.txt
 fi
 
 ntraces=`cat ${tracelist}|wc -l`
@@ -95,10 +93,17 @@ do
             do
               for mats in "${RANDOMMATRIX[@]}"
               do
-                # Skip all combos of the matrix file values 
-                # when no randomness is used
-                if { [ ${rand} -eq 0 ] && [ ${mats} -gt 0 ]; } || { [ ${rand} -eq 1 ] && [ ${mats} -eq 0 ]; } ; then
-                  echo "Skipping combination of ${rand} randomness and matrix file ${mats}"
+                # Skip:
+                # 1. all matrix file number values when no randomness is used
+                # 2. matrix file 0 when randomness used, because it doesnt exist
+                # 3. all random LLC policies when no randomness used
+                # 4. all non-random LLC policies when randomness used - deleted for now
+                #if { [ ${rand} -eq 0 ] && [ ${mats} -gt 0 ]; } || 
+                #   { [ ${rand} -eq 1 ] && [ ${mats} -eq 0 ]; } || 
+                #   { [ ${rand} -eq 0 ] && [[ $repls == *"_random"* ]]; } || 
+                #   { [ ${rand} -gt 0 ] && [[ $repls != *"_random"* ]]; } ; then
+                if { [ ${rand} -eq 0 ] && [ ${mats} -gt 0 ]; } || { [ ${rand} -eq 1 ] && [ ${mats} -eq 0 ]; } || { [ ${rand} -eq 0 ] && [[ $repls == *"_random"* ]]; } ; then
+                  echo "Skipping combination ${repls} replacement with ${rand} randomness and matrix file ${mats}"
                 else 
 
                   binary=${branchpreds}-${l1iprefs}-${l1dprefs}-${l2prefs}-${llcprefs}-${repls}-${NCORES}core
@@ -143,11 +148,11 @@ do
 #SBATCH --time=${limit_hours}:00:00                      # Set the wall clock limit to 48h
 #SBATCH --ntasks=${ntasks}                               # Request 2 task
 #SBATCH --mem=1024M                                      # Request 1GB per node
-#SBATCH --output=${RESULTS_DIR}/${DATE}/${NCORES}cores/${trace_name}_${binary}_${rand}rand_${rand}mat.%j   #Send stdout/err to "Example1Out.[jobID]"
+#SBATCH --output=${RESULTS_DIR}/${DATE}/${NCORES}cores/${trace_name}_${binary}_${rand}rand_${mats}mat.%j   #Send stdout/err to "Example1Out.[jobID]"
 
 ##OPTIONAL JOB SPECIFICATIONS
-#SBATCH --mail-type=ALL              		                # Send email on all job events
-#SBATCH --mail-user=elba@tamu.edu	                      # Send all emails to email_address
+##SBATCH --mail-type=FAIL              		                # Send email for failed job events only
+##SBATCH --mail-user=elba@tamu.edu	                      # Send all emails to email_address
 
 ##First Executable Line
 ${binary_running_path}/${binary} -warmup_instructions ${WARMUP} -simulation_instructions ${INSTRS} -random_llc ${rand} -matrix_num ${mats} -traces ${trace_routes[@]} 

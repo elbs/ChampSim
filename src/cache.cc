@@ -33,7 +33,6 @@ void CACHE::handle_fill()
         // First, get original address and make it into an array
         // Next, do matrix multiplication between the original address and the
         // invertible matrix
-        // TODO: make sure bit shifts for mat_mul is done correctly
         uint64_t block_bits = MSHR.entry[mshr_index].address >> (ADDR_LENGTH - lg2(NUM_SET));
         uint64_t sig_bits = MSHR.entry[mshr_index].address  >> lg2(NUM_SET);
         addr_to_arr(sig_bits, sig_bits_addr_arr);
@@ -46,11 +45,11 @@ void CACHE::handle_fill()
         
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
         
-        // TODO: uncomment all this
+        // TODO Elba : uncomment all this
         // If cache is LLC, then set indexing value is above calculations
-        //if (cache_type == IS_LLC && random_cache == IS_RANDOM) {
-        //  set = llc_set; 
-        //}
+        if (cache_type == IS_LLC && random_cache == IS_RANDOM) {
+          set = llc_set; 
+        }
         
         if (cache_type == IS_LLC) {
             // #1 LLC Find Victim 
@@ -301,11 +300,11 @@ void CACHE::handle_writeback()
         uint32_t set = get_set(WQ.entry[index].address);
         int way = check_hit(&WQ.entry[index]);
 
-        // TODO: uncomment all this 
-        //if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
-        //  set = llc_set;
-        //  way = llc_way;
-        //}
+        // TODO Elba: uncomment all this 
+        if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
+          set = llc_set;
+          way = llc_way;
+        }
         
         if (way >= 0) { // writeback hit (or RFO hit for L1D)
 
@@ -470,8 +469,8 @@ void CACHE::handle_writeback()
                     // #2 LLC Find Victim 
                     // Elba: set calculations already done before, but 
                     // need to be redone due to dumb code above.
-                    // TODO: uncomment below
-                    // if(random_cache == IS_RANDOM) set = llc_set;
+                    // TODO Elba: uncomment below
+                    if(random_cache == IS_RANDOM) set = llc_set;
                     way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, set, block[set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                 }
                 else
@@ -622,7 +621,6 @@ void CACHE::handle_read()
             // First, get original address and make it into an array
             // Next, do matrix multiplication between the original address and the
             // invertible matrix
-            // TODO: make sure mat_mul is done correctly
             uint64_t block_bits = RQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
             uint64_t sig_bits = RQ.entry[index].address  >> lg2(NUM_SET);
             addr_to_arr(sig_bits, sig_bits_addr_arr);
@@ -638,11 +636,11 @@ void CACHE::handle_read()
             uint32_t set = get_set(RQ.entry[index].address);
             int way = check_hit(&RQ.entry[index]);
         
-            // TODO: uncomment all this
-            //if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
-            //  set = llc_set;
-            //  way = llc_way;
-            //}
+            // TODO Elba: uncomment all this
+            if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
+              set = llc_set;
+              way = llc_way;
+            }
 
             if (way >= 0) { // read hit
 
@@ -954,7 +952,6 @@ void CACHE::handle_prefetch()
             // First, get original address and make it into an array
             // Next, do matrix multiplication between the original address and the
             // invertible matrix
-            // TODO: make sure mat_mul is done correctly
             uint64_t block_bits = PQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
             uint64_t sig_bits = PQ.entry[index].address  >> lg2(NUM_SET);
             addr_to_arr(sig_bits, sig_bits_addr_arr);
@@ -970,11 +967,11 @@ void CACHE::handle_prefetch()
             uint32_t set = get_set(PQ.entry[index].address);
             int way = check_hit(&PQ.entry[index]);
         
-            // TODO: uncomment all this
-            //if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
-            //  set = llc_set;
-            //  way = llc_way;
-            //}
+            // TODO Elba: uncomment all this
+            if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
+              set = llc_set;
+              way = llc_way;
+            }
 
             
             if (way >= 0) { // prefetch hit

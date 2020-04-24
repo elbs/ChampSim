@@ -17,15 +17,17 @@ L1DPREF=( no )
 
 # L2 Prefecher
 #L2PREF=( no ip_stride kpcp next_line spp_dev)
-L2PREF=( no spp_dev )
+#L2PREF=( no spp_dev )
+L2PREF=( no )
 
 # LLC Prefetcher
+#LLCPREF=( no next_line )
 #LLCPREF=( no next_line )
 LLCPREF=( no next_line )
 
 # LLC Replacement policy
 #LLCREPPOLS=( drrip lru ship srrip)
-LLCREPPOLS=( drrip_random drrip ship_random ship )
+LLCREPPOLS=( drrip_half drrip ship_half ship )
 
 # How many cores are used by each variation
 NCORES=1
@@ -33,8 +35,11 @@ NCORES=1
 binary_running_path=${BINARY_DIR}/running/
 rm -rf ${binary_running_path}/*-${NCORES}core
 
+# A directory for the binaries
 mkdir -p ${binary_running_path}
-nsims=$(echo "${ntraces}*${#BRANCHPRED[@]}*${#L1IPREF[@]}*${#L1DPREF[@]}*${#L2PREF[@]}*${#LLCPREF[@]}*${#LLCREPPOLS[@]}"|bc)
+
+# How many combinations are we compiling?
+nsims=$(echo "${#BRANCHPRED[@]}*${#L1IPREF[@]}*${#L1DPREF[@]}*${#L2PREF[@]}*${#LLCPREF[@]}*${#LLCREPPOLS[@]}"|bc)
 
 echo "Compiling all $nsims variations..."
 
