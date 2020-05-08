@@ -100,13 +100,13 @@ uint64_t rotl64 (uint64_t n, unsigned int c),
 int lg2(int n);
 
 // Elba: change uint64_t value to a 64-bit binary array
-uint64_t *addr_to_arr(uint64_t addr, uint64_t *arr);
+bool *addr_to_arr(uint64_t addr, bool *arr);
 
-// Elba: change 64-int binary (0/1 only) array to uint64_t value
-uint64_t arr_to_addr(uint64_t *arr);
+// Elba: change 64-bool binary (0/1 only) array to uint64_t value
+uint64_t arr_to_addr(bool *arr);
 
 // Elba: matrix multiplication
-void mat_mul(uint64_t *src_addr, uint64_t *dest_addr);
+void mat_mul(bool *src_addr, bool *dest_addr);
 
 // smart random number generator
 class RANDOM {

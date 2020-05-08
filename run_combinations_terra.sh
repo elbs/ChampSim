@@ -31,10 +31,10 @@ LLCPREF=( no )
 LLCREPPOLS=( drrip_half drrip ship_half ship )
 
 # LLC Randomness
-LLCRANDOM=(0 1)
+LLCRANDOM=( 0 1 )
 
 # Matrix File Values
-RANDOMMATRIX=( 0 1 2 3 4 5 6 7 8 9 10)
+RANDOMMATRIX=( 0 1 2 3 4 5 6 7 8 9 10 )
 
 # How many instructions we warm up to
 # How many we keep stats for

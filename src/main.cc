@@ -284,37 +284,36 @@ int lg2(int n)
 }
 
 // Elba: invertible matrix used for address manipulation
-// 64 is the length of the matrix
-uint64_t llc_inv_matrix[64][64];
+// Set to zero, just in case
+bool llc_inv_matrix[MAT_LENGTH][MAT_LENGTH];
 
-// Elba: change uint64_t value to a 64-int binary (0/1 only) array
-uint64_t *addr_to_arr(uint64_t addr, uint64_t *arr)
+// Elba: change uint64_t value to a 64-bool binary (0/1 only) array
+bool *addr_to_arr(uint64_t addr, bool *arr)
 {
   // Use bit shift and masking to get lone bits
   for (int i = 0; i < ADDR_LENGTH; i++) {
-   arr[i] = (uint64_t)((addr >> i) & 0xFF); 
+   arr[i] = (bool)((addr >> i) & 0x1); 
   }
 
   // Return the array pointer
   return arr;
 }
 
-// Elba: change 64-int binary (0/1 only) array to uint64_t
-uint64_t arr_to_addr(uint64_t *arr) 
+// Elba: change 64-bool binary (0/1 only) array to uint64_t
+uint64_t arr_to_addr(bool *arr) 
 {
   uint64_t addr = 0;
 
   for (int i = 0; i < ADDR_LENGTH; i++) {
-    addr += (uint64_t) arr[i];
+    if (arr[i])
+      addr |= 1 << i;
   }
 
   return addr;
 }
 
 // Elba: matrix multiplication
-// TODO: make it so that it only does multiplication 
-// with set selection bits
-void mat_mul(uint64_t *src_addr, uint64_t *dest_addr) 
+void mat_mul(bool *src_addr, bool *dest_addr) 
 {
   // Matrix is 64 x 1, by default. This is column dim. 
   const int addr_dim = 1;
@@ -663,7 +662,7 @@ int main(int argc, char** argv)
        
       cout << "LLC Matrix: " << endl;
      
-      // Create the full path name and make it into char array
+      // Create the full path name and make it into string
       string matrix_path = "/home/elba/ChampSim_elba/src/matrices/" + to_string(matrix_num) + ".matrix";
       int path_length = matrix_path.length();
       char c_mat_path[path_length + 1];
@@ -671,6 +670,7 @@ int main(int argc, char** argv)
 
       read_llc_inv_matrix((char *) c_mat_path);
       print_llc_inv_matrix();
+    
     }
 
     if (knob_low_bandwidth)

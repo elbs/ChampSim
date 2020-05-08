@@ -55,6 +55,8 @@ SHCT_class SHCT[NUM_CPUS][SHCT_SIZE];
 void CACHE::llc_initialize_replacement()
 {
     cout << "Initialize SHIP state" << endl;
+    // Elba: Print out number of sample sets
+    cout << "Number Sampled Sets: " << SAMPLER_SET << endl;
 
     for (int i=0; i<LLC_SET; i++) {
         for (int j=0; j<LLC_WAY; j++) {

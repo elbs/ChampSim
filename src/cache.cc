@@ -27,25 +27,25 @@ void CACHE::handle_fill()
        
         // Arrays to hold the current and also
         // modified address we'll use for set indexing
-        uint64_t sig_bits_addr_arr[ADDR_LENGTH];
-        uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
+        bool sig_bits_addr_arr[ADDR_LENGTH] = {0};
+        bool mod_sig_bits_addr_arr[ADDR_LENGTH] = {0};
         
         // First, get original address and make it into an array
         // Next, do matrix multiplication between the original address and the
         // invertible matrix
-        uint64_t block_bits = MSHR.entry[mshr_index].address >> (ADDR_LENGTH - lg2(NUM_SET));
-        uint64_t sig_bits = MSHR.entry[mshr_index].address  >> lg2(NUM_SET);
+        uint64_t block_bits = MSHR.entry[mshr_index].address & (BLOCK_SIZE - 1);
+        uint64_t sig_bits = MSHR.entry[mshr_index].address >> LOG2_BLOCK_SIZE;
         addr_to_arr(sig_bits, sig_bits_addr_arr);
         mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
-        uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
+        uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << LOG2_BLOCK_SIZE) | block_bits;
         
         // Finally, use the matrix multiplication result, but converted back to
         // an address
         llc_set = get_set(final_addr);
         
+        // access cache
         uint32_t set = get_set(MSHR.entry[mshr_index].address), way;
         
-        // TODO Elba : uncomment all this
         // If cache is LLC, then set indexing value is above calculations
         if (cache_type == IS_LLC && random_cache == IS_RANDOM) {
           set = llc_set; 
@@ -279,17 +279,17 @@ void CACHE::handle_writeback()
 
         // Arrays to hold the current and also
         // modified address we'll use for set indexing
-        uint64_t sig_bits_addr_arr[ADDR_LENGTH];
-        uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
+        bool sig_bits_addr_arr[ADDR_LENGTH] = {0};
+        bool mod_sig_bits_addr_arr[ADDR_LENGTH] = {0};
         
         // First, get original address and make it into an array
         // Next, do matrix multiplication between the original address and the
         // invertible matrix
-        uint64_t block_bits = WQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
-        uint64_t sig_bits = WQ.entry[index].address  >> lg2(NUM_SET);
+        uint64_t block_bits = WQ.entry[index].address & (BLOCK_SIZE - 1);
+        uint64_t sig_bits = WQ.entry[index].address  >> LOG2_BLOCK_SIZE;
         addr_to_arr(sig_bits, sig_bits_addr_arr);
         mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
-        uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
+        uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << LOG2_BLOCK_SIZE) | block_bits;
         
         // Finally, use the matrix multiplication result, but converted back to
         // an address
@@ -300,7 +300,7 @@ void CACHE::handle_writeback()
         uint32_t set = get_set(WQ.entry[index].address);
         int way = check_hit(&WQ.entry[index]);
 
-        // TODO Elba: uncomment all this 
+        // If cache is LLC, then set indexing value is above calculations
         if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
           set = llc_set;
           way = llc_way;
@@ -469,7 +469,6 @@ void CACHE::handle_writeback()
                     // #2 LLC Find Victim 
                     // Elba: set calculations already done before, but 
                     // need to be redone due to dumb code above.
-                    // TODO Elba: uncomment below
                     if(random_cache == IS_RANDOM) set = llc_set;
                     way = llc_find_victim(writeback_cpu, WQ.entry[index].instr_id, set, block[set], WQ.entry[index].ip, WQ.entry[index].full_addr, WQ.entry[index].type);
                 }
@@ -615,28 +614,28 @@ void CACHE::handle_read()
         
             // Arrays to hold the current and also
             // modified address we'll use for set indexing
-            uint64_t sig_bits_addr_arr[ADDR_LENGTH];
-            uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
+            bool sig_bits_addr_arr[ADDR_LENGTH] = {0};
+            bool mod_sig_bits_addr_arr[ADDR_LENGTH] = {0};
             
             // First, get original address and make it into an array
             // Next, do matrix multiplication between the original address and the
             // invertible matrix
-            uint64_t block_bits = RQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
-            uint64_t sig_bits = RQ.entry[index].address  >> lg2(NUM_SET);
+            uint64_t block_bits = RQ.entry[index].address & (BLOCK_SIZE - 1);
+            uint64_t sig_bits = RQ.entry[index].address  >> LOG2_BLOCK_SIZE;
             addr_to_arr(sig_bits, sig_bits_addr_arr);
             mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
-            uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
+            uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << LOG2_BLOCK_SIZE) | block_bits;
             
             // Finally, use the matrix multiplication result, but converted back to
             // an address
             llc_set = get_set(final_addr);
             llc_way = llc_check_hit(&RQ.entry[index], final_addr);
 
-            // access cache
+            // set and way to access cache
             uint32_t set = get_set(RQ.entry[index].address);
             int way = check_hit(&RQ.entry[index]);
         
-            // TODO Elba: uncomment all this
+            // If cache is LLC, then set indexing value is above calculations
             if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
               set = llc_set;
               way = llc_way;
@@ -945,18 +944,17 @@ void CACHE::handle_prefetch()
             
             // Arrays to hold the current and also
             // modified address we'll use for set indexing
-            uint64_t sig_bits_addr_arr[ADDR_LENGTH];
-            uint64_t mod_sig_bits_addr_arr[ADDR_LENGTH];
-            
+            bool sig_bits_addr_arr[ADDR_LENGTH] = {0};
+            bool mod_sig_bits_addr_arr[ADDR_LENGTH] = {0};
             
             // First, get original address and make it into an array
             // Next, do matrix multiplication between the original address and the
             // invertible matrix
-            uint64_t block_bits = PQ.entry[index].address >> (ADDR_LENGTH - lg2(NUM_SET));
-            uint64_t sig_bits = PQ.entry[index].address  >> lg2(NUM_SET);
+            uint64_t block_bits = PQ.entry[index].address & (BLOCK_SIZE - 1);
+            uint64_t sig_bits = PQ.entry[index].address  >> LOG2_BLOCK_SIZE;
             addr_to_arr(sig_bits, sig_bits_addr_arr);
             mat_mul(sig_bits_addr_arr, mod_sig_bits_addr_arr);
-            uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << lg2(NUM_SET)) | block_bits;
+            uint64_t final_addr = (arr_to_addr(mod_sig_bits_addr_arr) << LOG2_BLOCK_SIZE) | block_bits;
             
             // Finally, use the matrix multiplication result, but converted back to
             // an address
@@ -967,7 +965,7 @@ void CACHE::handle_prefetch()
             uint32_t set = get_set(PQ.entry[index].address);
             int way = check_hit(&PQ.entry[index]);
         
-            // TODO Elba: uncomment all this
+            // If cache is LLC, then set indexing value is above calculations
             if(cache_type == IS_LLC && random_cache == IS_RANDOM) {
               set = llc_set;
               way = llc_way;
