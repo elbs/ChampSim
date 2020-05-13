@@ -34,12 +34,14 @@ LLCREPPOLS=( drrip drrip_half ship ship_half )
 LLCRANDOM=( 0 1 )
 
 # Matrix File Values
-RANDOMMATRIX=( 0 1 2 3 4 5 6 7 8 9 10 )
+#RANDOMMATRIX=( 0 1 2 3 4 5 6 7 8 9 10 )
+RANDOMMATRIX=( ident )
 
 # Number of cores we tested on
 NCORES=( 1 )
 
-traces_path=${TRACELISTS}/spec2017_benchs.txt
+#traces_path=${TRACELISTS}/spec2017_benchs.txt
+traces_path=${TRACELISTS}/spec2017_benchs_short.txt
 results_path=${RESULTS_DIR}/${DATE}/${NCORES}cores/
 
 # Read all trace names, removing numbers, and extensions
@@ -98,7 +100,7 @@ do
                    printf "${tracename} , ${branchpreds} , ${l1iprefs} , ${l1dprefs} , ${l2prefs} , ${llcprefs} , " >> results_${DATE}.csv
                    printf "${repls} , ${NCORES} , ${rand} , ${mats} , " >> results_${DATE}.csv
                   
-                   cat ${results_path}/${result_file}.* | awk 'BEGIN {FS=" "} { if ($1=="Finished") print $5 " , " $7 " , " $10} END{ }' >> results_${DATE}.csv
+                   cat ${results_path}/${result_file}.* | awk 'BEGIN {FS=" "} { if($2=="Sampled") printf $4" , "; if ($1=="Finished") print $5 " , " $7 " , " $10} END{ }' >> results_${DATE}.csv
                   fi
                 done
                 
